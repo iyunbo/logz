@@ -4,3 +4,4 @@ log
 .idea
 __pycache__
 mlruns
+.vscode

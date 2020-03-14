@@ -1,0 +1,17 @@
+INPUT_DIR = 'logs/raw/'  # The input directory of log file
+OUTPUT_DIR = 'workflow/result/'  # The output directory of parsing results
+LOG_FILE = 'log4j-2020-02-28-22.log'  # The input log file name
+LOG_FORMAT = '<Date> <Time> <Level> <Component>: <Content>'  # HDFS log format
+EVENT_KEY = 'EventTemplate'  # The column name for event unique name
+SEQUENCE_KEY = 'Event'
+WINDOW_SIZE = 10
+BATCH_SIZE = 16
+NUM_EPOCHS = 100
+INPUT_SIZE = 1
+HIDDEN_SIZE = 64
+NUM_LAYERS = 2
+DEVICE = 'cpu'
+MODEL_DIR = 'workflow/result/model'
+NUM_CANDIDATES = 9
+NORMAL_SAMPLE = [67, 83, 30, 74, 73, 0, 22, 22, 24, 173, 186, 117, 79, 44, 45, 66, 205]
+ABNORMAL_SAMPLE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
