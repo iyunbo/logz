@@ -10,7 +10,7 @@ def generate(name, sample):
     hdfs = []
     ln = sample + [-1] * (config.WINDOW_SIZE + 1 - len(sample))
     hdfs.append(tuple(ln))
-    print('Number of sessions({}): {}'.format(name, len(hdfs)))
+    print('Number of sequences({}): {}'.format(name, len(ln)))
     return hdfs
 
 
@@ -29,8 +29,8 @@ def run(num_classes, model_path):
     print('model_path: {}'.format(model_path))
     test_normal_loader = generate('normal', config.NORMAL_SAMPLE)
     test_abnormal_loader = generate('abnormal', config.ABNORMAL_SAMPLE)
-    TP = 0
-    FP = 0
+    true_positive = 0
+    false_positive = 0
     # Test the model
     start_time = time.time()
     with torch.no_grad():
@@ -43,7 +43,7 @@ def run(num_classes, model_path):
                 output = model(seq)
                 predicted = torch.argsort(output, 1)[0][-num_candidates:]
                 if label not in predicted:
-                    FP += 1
+                    false_positive += 1
                     break
     with torch.no_grad():
         for line in test_abnormal_loader:
@@ -55,16 +55,16 @@ def run(num_classes, model_path):
                 output = model(seq)
                 predicted = torch.argsort(output, 1)[0][-num_candidates:]
                 if label not in predicted:
-                    TP += 1
+                    true_positive += 1
                     break
     elapsed_time = time.time() - start_time
     print('elapsed_time: {:.3f}s'.format(elapsed_time))
     # Compute precision, recall and F1-measure
-    FN = len(test_abnormal_loader) - TP
-    P = 100 * TP / (TP + FP)
-    R = 100 * TP / (TP + FN)
-    F1 = 2 * P * R / (P + R)
+    false_negative = len(test_abnormal_loader) - true_positive
+    precision = 100 * true_positive / (true_positive + false_positive)
+    recall = 100 * true_positive / (true_positive + false_negative)
+    f1 = 2 * precision * recall / (precision + recall)
     print(
         'false positive (FP): {}, false negative (FN): {}, Precision: {:.3f}%, Recall: {:.3f}%, F1-measure: {:.3f}%'.format(
-            FP, FN, P, R, F1))
+            false_positive, false_negative, precision, recall, f1))
     print('Finished Predicting')
