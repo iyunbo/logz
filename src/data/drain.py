@@ -17,19 +17,19 @@ log = logging.getLogger(__name__)
 
 class Logcluster:
     def __init__(self, log_template='', log_idl=None):
-        self.logTemplate = log_template
+        self.log_template = log_template
         if log_idl is None:
             log_idl = []
-        self.logIDL = log_idl
+        self.log_idl = log_idl
 
 
 class Node:
     def __init__(self, child_node=None, depth=0, digit_or_token=None):
         if child_node is None:
             child_node = dict()
-        self.childD = child_node
+        self.child_node = child_node
         self.depth = depth
-        self.digitOrToken = digit_or_token
+        self.digit_or_token = digit_or_token
 
 
 class LogParser:
@@ -62,93 +62,93 @@ class LogParser:
     def has_numbers(s):
         return any(char.isdigit() for char in s)
 
-    def tree_search(self, rn, seq):
-        retLogClust = None
+    def tree_search(self, root_node, seq):
+        ret_log_cluster = None
 
-        seqLen = len(seq)
-        if seqLen not in rn.childD:
-            return retLogClust
+        seq_len = len(seq)
+        if seq_len not in root_node.child_node:
+            return ret_log_cluster
 
-        parentn = rn.childD[seqLen]
+        parent_node = root_node.child_node[seq_len]
 
-        currentDepth = 1
+        current_depth = 1
         for token in seq:
-            if currentDepth >= self.depth or currentDepth > seqLen:
+            if current_depth >= self.depth or current_depth > seq_len:
                 break
 
-            if token in parentn.childD:
-                parentn = parentn.childD[token]
-            elif '<*>' in parentn.childD:
-                parentn = parentn.childD['<*>']
+            if token in parent_node.child_node:
+                parent_node = parent_node.child_node[token]
+            elif '<*>' in parent_node.child_node:
+                parent_node = parent_node.child_node['<*>']
             else:
-                return retLogClust
-            currentDepth += 1
+                return ret_log_cluster
+            current_depth += 1
 
-        logClustL = parentn.childD
+        log_cluster_l = parent_node.child_node
 
-        retLogClust = self.fastMatch(logClustL, seq)
+        ret_log_cluster = self.fast_match(log_cluster_l, seq)
 
-        return retLogClust
+        return ret_log_cluster
 
     def addSeqToPrefixTree(self, rn, logClust):
-        seqLen = len(logClust.logTemplate)
-        if seqLen not in rn.childD:
+        seqLen = len(logClust.log_template)
+        if seqLen not in rn.child_node:
             firtLayerNode = Node(depth=1, digit_or_token=seqLen)
-            rn.childD[seqLen] = firtLayerNode
+            rn.child_node[seqLen] = firtLayerNode
         else:
-            firtLayerNode = rn.childD[seqLen]
+            firtLayerNode = rn.child_node[seqLen]
 
         parentn = firtLayerNode
 
         currentDepth = 1
-        for token in logClust.logTemplate:
+        for token in logClust.log_template:
 
             # Add current log cluster to the leaf node
             if currentDepth >= self.depth or currentDepth > seqLen:
-                if len(parentn.childD) == 0:
-                    parentn.childD = [logClust]
+                if len(parentn.child_node) == 0:
+                    parentn.child_node = [logClust]
                 else:
-                    parentn.childD.append(logClust)
+                    parentn.child_node.append(logClust)
                 break
 
             # If token not matched in this layer of existing tree.
-            if token not in parentn.childD:
+            if token not in parentn.child_node:
                 if not self.has_numbers(token):
-                    if '<*>' in parentn.childD:
-                        if len(parentn.childD) < self.maxChild:
+                    if '<*>' in parentn.child_node:
+                        if len(parentn.child_node) < self.maxChild:
                             newNode = Node(depth=currentDepth + 1, digit_or_token=token)
-                            parentn.childD[token] = newNode
+                            parentn.child_node[token] = newNode
                             parentn = newNode
                         else:
-                            parentn = parentn.childD['<*>']
+                            parentn = parentn.child_node['<*>']
                     else:
-                        if len(parentn.childD) + 1 < self.maxChild:
+                        if len(parentn.child_node) + 1 < self.maxChild:
                             newNode = Node(depth=currentDepth + 1, digit_or_token=token)
-                            parentn.childD[token] = newNode
+                            parentn.child_node[token] = newNode
                             parentn = newNode
-                        elif len(parentn.childD) + 1 == self.maxChild:
+                        elif len(parentn.child_node) + 1 == self.maxChild:
                             newNode = Node(depth=currentDepth + 1, digit_or_token='<*>')
-                            parentn.childD['<*>'] = newNode
+                            parentn.child_node['<*>'] = newNode
                             parentn = newNode
                         else:
-                            parentn = parentn.childD['<*>']
+                            parentn = parentn.child_node['<*>']
 
                 else:
-                    if '<*>' not in parentn.childD:
+                    if '<*>' not in parentn.child_node:
                         newNode = Node(depth=currentDepth + 1, digit_or_token='<*>')
-                        parentn.childD['<*>'] = newNode
+                        parentn.child_node['<*>'] = newNode
                         parentn = newNode
                     else:
-                        parentn = parentn.childD['<*>']
+                        parentn = parentn.child_node['<*>']
 
             # If the token is matched
             else:
-                parentn = parentn.childD[token]
+                parentn = parentn.child_node[token]
 
             currentDepth += 1
 
     # seq1 is template
-    def seqDist(self, seq1, seq2):
+    def seq_dist(self, seq1, seq2):
         assert len(seq1) == len(seq2)
         simTokens = 0
         numOfPar = 0
@@ -164,49 +164,50 @@ class LogParser:
 
         return retVal, numOfPar
 
-    def fastMatch(self, logClustL, seq):
-        retLogClust = None
+    def fast_match(self, log_cluster_l, seq):
+        ret_log_cluster = None
 
-        maxSim = -1
-        maxNumOfPara = -1
-        maxClust = None
+        max_sim = -1
+        max_num_param = -1
+        max_cluster = None
 
-        for logClust in logClustL:
-            curSim, curNumOfPara = self.seqDist(logClust.logTemplate, seq)
-            if curSim > maxSim or (curSim == maxSim and curNumOfPara > maxNumOfPara):
-                maxSim = curSim
-                maxNumOfPara = curNumOfPara
-                maxClust = logClust
+        for log_cluster in log_cluster_l:
+            current_similarity, current_num_param = self.seq_dist(log_cluster.log_template, seq)
+            if current_similarity > max_sim or (current_similarity == max_sim and current_num_param > max_num_param):
+                max_sim = current_similarity
+                max_num_param = current_num_param
+                max_cluster = log_cluster
 
-        if maxSim >= self.st:
-            retLogClust = maxClust
+        if max_sim >= self.st:
+            ret_log_cluster = max_cluster
 
-        return retLogClust
+        return ret_log_cluster
 
-    def getTemplate(self, seq1, seq2):
+    @staticmethod
+    def get_template(seq1, seq2):
         assert len(seq1) == len(seq2)
-        retVal = []
+        result = []
 
         i = 0
         for word in seq1:
             if word == seq2[i]:
-                retVal.append(word)
+                result.append(word)
             else:
-                retVal.append('<*>')
+                result.append('<*>')
 
             i += 1
 
-        return retVal
+        return result
 
     def outputResult(self, logClustL):
         log_templates = [0] * self.df_log.shape[0]
         log_templateids = [0] * self.df_log.shape[0]
         df_events = []
         for logClust in logClustL:
-            template_str = ' '.join(logClust.logTemplate)
-            occurrence = len(logClust.logIDL)
+            template_str = ' '.join(logClust.log_template)
+            occurrence = len(logClust.log_idl)
             template_id = hashlib.md5(template_str.encode('utf-8')).hexdigest()[0:8]
-            for logID in logClust.logIDL:
+            for logID in logClust.log_idl:
                 logID -= 1
                 log_templates[logID] = template_str
                 log_templateids[logID] = template_id
@@ -244,8 +245,8 @@ class LogParser:
 
         if node.depth == self.depth:
             return 1
-        for child in node.childD:
-            self.printTree(node.childD[child], dep + 1)
+        for child in node.child_node:
+            self.printTree(node.child_node[child], dep + 1)
 
     def parse(self, logName):
         log.info('Parsing file: ' + os.path.join(self.path, logName))
@@ -271,7 +272,7 @@ class LogParser:
 
             # Add the new log message to the existing cluster
             else:
-                newTemplate = self.getTemplate(message_template, matchCluster.logTemplate)
+                newTemplate = self.get_template(message_template, matchCluster.logTemplate)
                 matchCluster.logIDL.append(logID)
                 if ' '.join(newTemplate) != ' '.join(matchCluster.logTemplate):
                     matchCluster.logTemplate = newTemplate
