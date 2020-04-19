@@ -16,7 +16,7 @@ def make_sequences(name, sample, window_size):
     sequences = []
     ln = sample + [-1] * (window_size + 1 - len(sample))
     sequences.append(tuple(ln))
-    log.info('Number of sequences({}): {}'.format(name, len(ln)))
+    log.info(f'Number of sequences({name}): {len(ln)}')
     return sequences
 
 
@@ -42,30 +42,10 @@ def predict(num_classes,
 
     # Test the model
     start_time = time.time()
-    with torch.no_grad():
-        for line in test_normal_loader:
-            for i in range(len(line) - window_size):
-                seq = line[i:i + window_size]
-                label = line[i + window_size]
-                seq = torch.tensor(seq, dtype=torch.float).view(-1, window_size, input_size).to(device)
-                label = torch.tensor(label).view(-1).to(device)
-                output = model(seq)
-                predicted = torch.argsort(output, 1)[0][-num_candidates:]
-                if label not in predicted:
-                    false_positive += 1
-                    break
-    with torch.no_grad():
-        for line in test_abnormal_loader:
-            for i in range(len(line) - window_size):
-                seq = line[i:i + window_size]
-                label = line[i + window_size]
-                seq = torch.tensor(seq, dtype=torch.float).view(-1, window_size, input_size).to(device)
-                label = torch.tensor(label).view(-1).to(device)
-                output = model(seq)
-                predicted = torch.argsort(output, 1)[0][-num_candidates:]
-                if label not in predicted:
-                    true_positive += 1
-                    break
+    false_positive = test_model(device, false_positive, input_size, model, num_candidates, test_normal_loader,
+                                window_size)
+    true_positive = test_model(device, true_positive, input_size, model, num_candidates, test_abnormal_loader,
+                               window_size)
     elapsed_time = time.time() - start_time
     log.info('elapsed_time: {:.3f}s'.format(elapsed_time))
     # Compute precision, recall and F1-measure
@@ -77,6 +57,22 @@ def predict(num_classes,
         'false positive (FP): {}, false negative (FN): {}, Precision: {:.3f}%, Recall: {:.3f}%, F1-measure: {:.3f}%'.format(
             false_positive, false_negative, precision, recall, f1))
     log.info('Finished Predicting')
+
+
+def test_model(device, positive, input_size, model, num_candidates, test_data_loader, window_size):
+    with torch.no_grad():
+        for line in test_data_loader:
+            for i in range(len(line) - window_size):
+                seq = line[i:i + window_size]
+                label = line[i + window_size]
+                seq = torch.tensor(seq, dtype=torch.float).view(-1, window_size, input_size).to(device)
+                label = torch.tensor(label).view(-1).to(device)
+                output = model(seq)
+                predicted = torch.argsort(output, 1)[0][-num_candidates:]
+                if label not in predicted:
+                    positive += 1
+                    break
+    return positive
 
 
 def train(dataloader, model_dir, num_classes, window_size, batch_size, num_epochs, input_size, hidden_size, num_layers,
