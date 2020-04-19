@@ -2,9 +2,9 @@ import logging
 import os.path as path
 import pathlib
 
+import helper
 from ..constant import PLACEHOLDER_PARAM
 from ..data import drain
-import helper
 
 TEST_LOG = "test.log"
 
@@ -18,16 +18,15 @@ log = logging.getLogger(__name__)
 
 
 def test_has_numbers():
-    assert parser.has_numbers("xxx9xxx")
-    assert parser.has_numbers("xxx9x1x")
-    assert not parser.has_numbers("xxxaxxx")
+    assert parser.has_number("xxx9xxx")
+    assert parser.has_number("xxx9x1x")
+    assert not parser.has_number("xxxaxxx")
 
 
 def test_load_data():
     parser.log_name = TEST_LOG
     parser.load_data()
     df = parser.df_log
-    logging.info(f"loaded df: {df.head()}")
     assert df.columns.size == 6, "should contains all components + ID"
 
 
@@ -51,6 +50,64 @@ def test_get_template():
 def test_seq_dist():
     line = ["20/02/28", "22:47:37", "INFO", "DatabricksILoop$", ":", "Finished creating throwaway interpreter"]
     template = [PLACEHOLDER_PARAM, PLACEHOLDER_PARAM, "INFO", PLACEHOLDER_PARAM, ":", PLACEHOLDER_PARAM]
-    similarity, param_num = parser.seq_dist(template, line)
+    similarity, param_num = parser.seq_similarity(template, line)
     assert similarity == 2.0 / 6
     assert param_num == 4
+
+
+def test_fast_match():
+    line = ["20/02/28", "22:47:37", "INFO", "DatabricksILoop$", ":", "Finished creating throwaway interpreter"]
+    template1 = [PLACEHOLDER_PARAM, PLACEHOLDER_PARAM, "INFO", "DatabricksILoop$", ":", PLACEHOLDER_PARAM]
+    template2 = [PLACEHOLDER_PARAM, PLACEHOLDER_PARAM, "DEBUG", "DatabricksILoop$", ":", PLACEHOLDER_PARAM]
+    cluster1 = drain.LogCluster(template1)
+    cluster2 = drain.LogCluster(template2)
+    matched_cluster = parser.fast_match([cluster1, cluster2], line)
+    assert matched_cluster == cluster1
+
+
+def test_match_with_greater_param_number():
+    line = ["20/02/28", "22:47:37", "INFO", "DatabricksILoop$", ":", "Finished creating throwaway interpreter"]
+    template1 = ["20/02/28", PLACEHOLDER_PARAM, "DEBUG", "DatabricksILoop$", ":", PLACEHOLDER_PARAM]
+    template2 = [PLACEHOLDER_PARAM, PLACEHOLDER_PARAM, "INFO", "DatabricksILoop$", ":", PLACEHOLDER_PARAM]
+    cluster1 = drain.LogCluster(template1)
+    cluster2 = drain.LogCluster(template2)
+    matched_cluster = parser.fast_match([cluster1, cluster2], line)
+    assert matched_cluster == cluster2
+
+
+def test_tree_search():
+    root = drain.Node()
+    cluster1 = drain.LogCluster(sequence=["xyz", "<*>"], id_list=["1"])
+    cluster2 = drain.LogCluster(sequence=["<*>", "aaa"], id_list=["2"])
+    cluster3 = drain.LogCluster(sequence=["<*>", "kkk"], id_list=["3"])
+    parser.add_to_tree(root, cluster1)
+    parser.add_to_tree(root, cluster2)
+    parser.add_to_tree(root, cluster3)
+    match_cluster = parser.tree_search(root, ["xxx", "kkk"])
+    assert match_cluster == cluster3, "[<*>, kkk] should match [xxx, kkk]"
+
+
+def test_tree_search_should_return_none_if_length_miss_match():
+    line = ["20/02/28", "22:47:37", "INFO", "DatabricksILoop$", ":", "Finished creating throwaway interpreter"]
+    tree = drain.Node({1: drain.Node(), 2: drain.Node()}, depth=3, digit_or_token="xxx")
+    cluster = parser.tree_search(tree, line)
+    assert cluster is None
+
+
+def test_add_to_tree():
+    cluster1 = drain.LogCluster(sequence=["xxx", "yyy"], id_list=["1"])
+    cluster2 = drain.LogCluster(sequence=["zzz", "aaa"], id_list=["2"])
+    root = drain.Node()
+    parser.add_to_tree(root, cluster1)
+    parser.add_to_tree(root, cluster2)
+    assert root.depth == 0, "root node should have depth 0"
+    assert root.child_node[2].depth == 1, "first layer (size of 2) should have depth 1"
+    assert len(root.child_node[2].child_node) == 2, "we added two node, so the second layer should have 2 children"
+    assert root.child_node[2].child_node["xxx"].depth == 2, "the second layer (xxx) should have depth 2"
+    assert root.child_node[2].child_node["zzz"].depth == 2, "the second layer (zzz) should have depth 2"
+    assert len(root.child_node[2].child_node["xxx"].child_node) == 1, "node(xxx) only has one child"
+    assert len(root.child_node[2].child_node["zzz"].child_node) == 1, "node(zzz) only has one child"
+    assert root.child_node[2].child_node["xxx"].child_node[0].sequence == ["xxx", "yyy"], \
+        "node(xxx) should contain (xxx, yyy)"
+    assert root.child_node[2].child_node["zzz"].child_node[0].sequence == ["zzz", "aaa"], \
+        "node(xxx) should contain (zzz, aaa)"
