@@ -54,8 +54,8 @@ def predict(num_classes,
     recall = 100 * true_positive / (true_positive + false_negative)
     f1 = 2 * precision * recall / (precision + recall)
     log.info(
-        'false positive (FP): {}, false negative (FN): {}, Precision: {:.3f}%, Recall: {:.3f}%, F1-measure: {:.3f}%'.format(
-            false_positive, false_negative, precision, recall, f1))
+        f'false positive (FP): {false_positive}, false negative (FN): {false_negative}, Precision: {precision:.2f}%, '
+        f'Recall: {recall:.2f}%, F1-measure: {f1:.2f}%')
     log.info('Finished Predicting')
 
 
