@@ -9,6 +9,7 @@ import logging
 import os
 import re
 from datetime import datetime
+from typing import Union
 
 import pandas as pd
 
@@ -67,7 +68,13 @@ class LogParser:
     def has_number(s):
         return any(char.isdigit() for char in s)
 
-    def tree_search(self, root_node, seq):
+    def tree_search(self, root_node: Node, seq: list) -> Union[LogCluster, None]:
+        """
+        Search the matching Log cluster in the tree.
+        :param root_node: the root of the tree
+        :param seq: the sequence of log tokens
+        :return: matching LogCluster or None if none matches
+        """
         target_cluster = None
 
         seq_len = len(seq)
@@ -239,9 +246,9 @@ class LogParser:
         df_event.to_csv(os.path.join(self.savePath, self.log_name + '_templates.csv'), index=False,
                         columns=["EventId", "EventTemplate", "Occurrences"])
 
-    def print_tree(self, node, dep):
+    def print_tree(self, node, depth):
         output = ''
-        for i in range(dep):
+        for i in range(depth):
             output += '\t'
 
         if node.depth == 0:
@@ -256,7 +263,7 @@ class LogParser:
         if node.depth == self.depth:
             return 1
         for child in node.child_node:
-            self.print_tree(node.child_node[child], dep + 1)
+            self.print_tree(node.child_node[child], depth + 1)
 
     def parse(self, log_name):
         print('Parsing file: ' + os.path.join(self.path, log_name))
@@ -348,12 +355,13 @@ class LogParser:
 
     @staticmethod
     def get_parameter_list(row):
-        template_regex = re.sub(r"<.{1,5}>", "<*>", row["EventTemplate"])
-        if "<*>" not in template_regex:
+        template_regex = re.sub(r"<[^<>]+>", PLACEHOLDER_PARAM, row["EventTemplate"])
+        if PLACEHOLDER_PARAM not in template_regex:
             return []
         template_regex = re.sub(r'([^A-Za-z0-9])', r'\\\1', template_regex)
+        escaped_param_placeholder = re.sub(r'([^A-Za-z0-9])', r'\\\1', PLACEHOLDER_PARAM)
         template_regex = re.sub(r'\\ +', r'\\s+', template_regex)
-        template_regex = "^" + template_regex.replace("<*>", "(.*?)") + "$"
+        template_regex = "^" + template_regex.replace(escaped_param_placeholder, "(.*?)") + "$"
         parameter_list = re.findall(template_regex, row["Content"])
         parameter_list = parameter_list[0] if parameter_list else ()
         parameter_list = list(parameter_list) if isinstance(parameter_list, tuple) else [parameter_list]

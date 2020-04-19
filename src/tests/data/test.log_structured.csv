@@ -4,32 +4,32 @@ LineId,Date,Time,Level,Component,Content,EventId,EventTemplate,ParameterList
 3,20/02/28,22:47:37,INFO,SharedState,loading hive config file: file:/databricks/hive/conf/hive-site.xml,af7e1aed,loading hive config file: file:/databricks/hive/conf/hive-site.xml,[]
 4,20/02/28,22:47:37,INFO,SharedState,Setting hive.metastore.warehouse.dir ('null') to the value of spark.sql.warehouse.dir ('/user/hive/warehouse').,976cbf3b,Setting hive.metastore.warehouse.dir ('null') to the value of spark.sql.warehouse.dir ('/user/hive/warehouse').,[]
 5,20/02/28,22:47:37,INFO,SharedState,Warehouse path is '/user/hive/warehouse'.,2295f829,Warehouse path is '/user/hive/warehouse'.,[]
-6,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@5b066c33{/SQL,null,AVAILABLE,@Spark}",00ac854a,Started <*>,[]
-7,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@62ea8931{/SQL/json,null,AVAILABLE,@Spark}",00ac854a,Started <*>,[]
-8,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@71166348{/SQL/execution,null,AVAILABLE,@Spark}",00ac854a,Started <*>,[]
-9,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@6d874695{/SQL/execution/json,null,AVAILABLE,@Spark}",00ac854a,Started <*>,[]
-10,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@10ed037a{/static/sql,null,AVAILABLE,@Spark}",00ac854a,Started <*>,[]
-11,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@150fc7a7{/storage/iocache,null,AVAILABLE,@Spark}",00ac854a,Started <*>,[]
-12,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@55d8c2c4{/storage/iocache/json,null,AVAILABLE,@Spark}",00ac854a,Started <*>,[]
+6,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@5b066c33{/SQL,null,AVAILABLE,@Spark}",00ac854a,Started <*>,"['o.e.j.s.ServletContextHandler@5b066c33{/SQL,null,AVAILABLE,@Spark}']"
+7,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@62ea8931{/SQL/json,null,AVAILABLE,@Spark}",00ac854a,Started <*>,"['o.e.j.s.ServletContextHandler@62ea8931{/SQL/json,null,AVAILABLE,@Spark}']"
+8,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@71166348{/SQL/execution,null,AVAILABLE,@Spark}",00ac854a,Started <*>,"['o.e.j.s.ServletContextHandler@71166348{/SQL/execution,null,AVAILABLE,@Spark}']"
+9,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@6d874695{/SQL/execution/json,null,AVAILABLE,@Spark}",00ac854a,Started <*>,"['o.e.j.s.ServletContextHandler@6d874695{/SQL/execution/json,null,AVAILABLE,@Spark}']"
+10,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@10ed037a{/static/sql,null,AVAILABLE,@Spark}",00ac854a,Started <*>,"['o.e.j.s.ServletContextHandler@10ed037a{/static/sql,null,AVAILABLE,@Spark}']"
+11,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@150fc7a7{/storage/iocache,null,AVAILABLE,@Spark}",00ac854a,Started <*>,"['o.e.j.s.ServletContextHandler@150fc7a7{/storage/iocache,null,AVAILABLE,@Spark}']"
+12,20/02/28,22:47:37,INFO,ContextHandler,"Started o.e.j.s.ServletContextHandler@55d8c2c4{/storage/iocache/json,null,AVAILABLE,@Spark}",00ac854a,Started <*>,"['o.e.j.s.ServletContextHandler@55d8c2c4{/storage/iocache/json,null,AVAILABLE,@Spark}']"
 13,20/02/28,22:47:37,INFO,DatabricksILoop$,Finished creating throwaway interpreter,6c28c815,Finished creating throwaway interpreter,[]
 14,20/02/28,22:47:38,INFO,StateStoreCoordinatorRef,Registered StateStoreCoordinator endpoint,931b701e,Registered StateStoreCoordinator endpoint,[]
 15,20/02/28,22:47:40,INFO,HiveUtils,"Initializing execution hive, version 1.2.1",916787de,"Initializing execution hive, version 1.2.1",[]
 16,20/02/28,22:47:41,INFO,HiveMetaStore,0: Opening raw store with implemenation class:org.apache.hadoop.hive.metastore.ObjectStore,7773531d,0: Opening raw store with implemenation class:org.apache.hadoop.hive.metastore.ObjectStore,[]
 17,20/02/28,22:47:41,INFO,ObjectStore,"ObjectStore, initialize called",f97d2395,"ObjectStore, initialize called",[]
-18,20/02/28,22:47:41,INFO,Persistence,Property hive.metastore.integral.jdo.pushdown unknown - will be ignored,187a75f5,Property <*> unknown - will be ignored,[]
-19,20/02/28,22:47:41,INFO,Persistence,Property datanucleus.cache.level2 unknown - will be ignored,187a75f5,Property <*> unknown - will be ignored,[]
-20,20/02/28,22:47:41,INFO,Persistence,Property datanucleus.schema.autoCreateAll unknown - will be ignored,187a75f5,Property <*> unknown - will be ignored,[]
+18,20/02/28,22:47:41,INFO,Persistence,Property hive.metastore.integral.jdo.pushdown unknown - will be ignored,187a75f5,Property <*> unknown - will be ignored,['hive.metastore.integral.jdo.pushdown']
+19,20/02/28,22:47:41,INFO,Persistence,Property datanucleus.cache.level2 unknown - will be ignored,187a75f5,Property <*> unknown - will be ignored,['datanucleus.cache.level2']
+20,20/02/28,22:47:41,INFO,Persistence,Property datanucleus.schema.autoCreateAll unknown - will be ignored,187a75f5,Property <*> unknown - will be ignored,['datanucleus.schema.autoCreateAll']
 21,20/02/28,22:47:44,INFO,ObjectStore,"Setting MetaStore object pin classes with hive.metastore.cache.pinobjtypes=""Table,StorageDescriptor,SerDeInfo,Partition,Database,Type,FieldSchema,Order""",b90681cc,"Setting MetaStore object pin classes with hive.metastore.cache.pinobjtypes=""Table,StorageDescriptor,SerDeInfo,Partition,Database,Type,FieldSchema,Order""",[]
-22,20/02/28,22:47:46,INFO,Datastore,"The class ""org.apache.hadoop.hive.metastore.model.MFieldSchema"" is tagged as ""embedded-only"" so does not have its own datastore table.",5592bcff,"The class <*> is tagged as ""embedded-only"" so does not have its own datastore table.",[]
-23,20/02/28,22:47:46,INFO,Datastore,"The class ""org.apache.hadoop.hive.metastore.model.MOrder"" is tagged as ""embedded-only"" so does not have its own datastore table.",5592bcff,"The class <*> is tagged as ""embedded-only"" so does not have its own datastore table.",[]
-24,20/02/28,22:47:47,INFO,Datastore,"The class ""org.apache.hadoop.hive.metastore.model.MFieldSchema"" is tagged as ""embedded-only"" so does not have its own datastore table.",5592bcff,"The class <*> is tagged as ""embedded-only"" so does not have its own datastore table.",[]
-25,20/02/28,22:47:47,INFO,Datastore,"The class ""org.apache.hadoop.hive.metastore.model.MOrder"" is tagged as ""embedded-only"" so does not have its own datastore table.",5592bcff,"The class <*> is tagged as ""embedded-only"" so does not have its own datastore table.",[]
+22,20/02/28,22:47:46,INFO,Datastore,"The class ""org.apache.hadoop.hive.metastore.model.MFieldSchema"" is tagged as ""embedded-only"" so does not have its own datastore table.",5592bcff,"The class <*> is tagged as ""embedded-only"" so does not have its own datastore table.","['""org.apache.hadoop.hive.metastore.model.MFieldSchema""']"
+23,20/02/28,22:47:46,INFO,Datastore,"The class ""org.apache.hadoop.hive.metastore.model.MOrder"" is tagged as ""embedded-only"" so does not have its own datastore table.",5592bcff,"The class <*> is tagged as ""embedded-only"" so does not have its own datastore table.","['""org.apache.hadoop.hive.metastore.model.MOrder""']"
+24,20/02/28,22:47:47,INFO,Datastore,"The class ""org.apache.hadoop.hive.metastore.model.MFieldSchema"" is tagged as ""embedded-only"" so does not have its own datastore table.",5592bcff,"The class <*> is tagged as ""embedded-only"" so does not have its own datastore table.","['""org.apache.hadoop.hive.metastore.model.MFieldSchema""']"
+25,20/02/28,22:47:47,INFO,Datastore,"The class ""org.apache.hadoop.hive.metastore.model.MOrder"" is tagged as ""embedded-only"" so does not have its own datastore table.",5592bcff,"The class <*> is tagged as ""embedded-only"" so does not have its own datastore table.","['""org.apache.hadoop.hive.metastore.model.MOrder""']"
 26,20/02/28,22:47:47,INFO,MetaStoreDirectSql,"Using direct SQL, underlying DB is DERBY",e8fc0ba7,"Using direct SQL, underlying DB is DERBY",[]
 27,20/02/28,22:47:47,INFO,ObjectStore,Initialized ObjectStore,fee37921,Initialized ObjectStore,[]
 28,20/02/28,22:47:47,WARN,ObjectStore,Version information not found in metastore. hive.metastore.schema.verification is not enabled so recording the schema version 1.2.0,571c9214,Version information not found in metastore. hive.metastore.schema.verification is not enabled so recording the schema version 1.2.0,[]
 29,20/02/28,22:47:48,WARN,ObjectStore,"Failed to get database default, returning NoSuchObjectException",c111d0d0,"Failed to get database default, returning NoSuchObjectException",[]
-30,20/02/28,22:47:48,INFO,HiveMetaStore,Added admin role in metastore,36a330ca,Added <*> role in metastore,[]
-31,20/02/28,22:47:48,INFO,HiveMetaStore,Added public role in metastore,36a330ca,Added <*> role in metastore,[]
+30,20/02/28,22:47:48,INFO,HiveMetaStore,Added admin role in metastore,36a330ca,Added <*> role in metastore,['admin']
+31,20/02/28,22:47:48,INFO,HiveMetaStore,Added public role in metastore,36a330ca,Added <*> role in metastore,['public']
 32,20/02/28,22:47:48,INFO,HiveMetaStore,"No user is added in admin role, since config is empty",ba641907,"No user is added in admin role, since config is empty",[]
 33,20/02/28,22:47:48,INFO,HiveMetaStore,0: get_all_databases,494bd030,0: get_all_databases,[]
 34,20/02/28,22:47:48,INFO,audit,ugi=root	ip=unknown-ip-addr	cmd=get_all_databases,a44f6d49,ugi=root ip=unknown-ip-addr cmd=get_all_databases,[]

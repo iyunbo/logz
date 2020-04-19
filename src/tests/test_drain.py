@@ -77,14 +77,14 @@ def test_match_with_greater_param_number():
 
 def test_tree_search():
     root = drain.Node()
-    cluster1 = drain.LogCluster(sequence=["xyz", "<*>"], id_list=["1"])
-    cluster2 = drain.LogCluster(sequence=["<*>", "aaa"], id_list=["2"])
-    cluster3 = drain.LogCluster(sequence=["<*>", "kkk"], id_list=["3"])
+    cluster1 = drain.LogCluster(sequence=["xyz", PLACEHOLDER_PARAM], id_list=["1"])
+    cluster2 = drain.LogCluster(sequence=[PLACEHOLDER_PARAM, "aaa"], id_list=["2"])
+    cluster3 = drain.LogCluster(sequence=[PLACEHOLDER_PARAM, "kkk"], id_list=["3"])
     parser.add_to_tree(root, cluster1)
     parser.add_to_tree(root, cluster2)
     parser.add_to_tree(root, cluster3)
     match_cluster = parser.tree_search(root, ["xxx", "kkk"])
-    assert match_cluster == cluster3, "[<*>, kkk] should match [xxx, kkk]"
+    assert match_cluster == cluster3, f"[{PLACEHOLDER_PARAM}, kkk] should match [xxx, kkk]"
 
 
 def test_tree_search_should_return_none_if_length_miss_match():
@@ -111,3 +111,20 @@ def test_add_to_tree():
         "node(xxx) should contain (xxx, yyy)"
     assert root.child_node[2].child_node["zzz"].child_node[0].sequence == ["zzz", "aaa"], \
         "node(xxx) should contain (zzz, aaa)"
+
+
+def test_print_tree():
+    root = drain.Node()
+    parser.add_to_tree(root, drain.LogCluster(sequence=["fff", "<*>"], id_list=["2"]))
+    parser.add_to_tree(root, drain.LogCluster(sequence=["zzz", "ccc", "bbb"], id_list=["3"]))
+    parser.add_to_tree(root, drain.LogCluster(sequence=["yyy", "ddd", "bbb", "eee"], id_list=["4"]))
+    parser.print_tree(root, 0)
+
+
+def test_get_parameter_list():
+    row = {"Content": "20/02/28 22:47:36 INFO JettyClient$: xxx",
+           "Component": "JettyClient$",
+           "EventTemplate": "<Date> <Time> <Level> <Component>: <Content>"}
+    params = parser.get_parameter_list(row)
+
+    assert len(params) == 5
