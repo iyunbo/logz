@@ -1,3 +1,5 @@
-SUFFIX_PARSED_LOG = '_structured.csv'
+SUFFIX_PARSED_LOG = "_structured.csv"
 
-PLACEHOLDER_PARAM = '<*>'
+PLACEHOLDER_PARAM = "<*>"
+
+EMPTY_TOKEN = "#N/A#"

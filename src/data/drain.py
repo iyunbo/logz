@@ -13,7 +13,7 @@ from typing import Union
 
 import pandas as pd
 
-from ..constant import PLACEHOLDER_PARAM
+from ..constant import PLACEHOLDER_PARAM, EMPTY_TOKEN
 
 log = logging.getLogger(__name__)
 
@@ -108,6 +108,11 @@ class LogParser:
         return target_cluster
 
     def add_to_tree(self, root_node, cluster):
+        """
+        Core algorithm for inserting a log cluster into existing token tree
+        :param root_node: the root of the tree
+        :param cluster: log cluster for insertion
+        """
         seq_len = len(cluster.sequence)
         if seq_len not in root_node.child_node:
             first_layer_node = Node(depth=1, digit_or_token=seq_len)
@@ -167,7 +172,7 @@ class LogParser:
     @staticmethod
     def seq_similarity(template, seq):
         """
-        Calculate sequence similarity regarding to specified template
+        Calculate sequence similarity according to specified template
         :param template: the log template to consider
         :param seq: the sequence to analyse
         :return: the similarity between the sequence and the template, the number of detected parameters
@@ -188,6 +193,12 @@ class LogParser:
         return similarity, param_num
 
     def fast_match(self, cluster_list, seq):
+        """
+        Find a match of sequence from a log cluster (see LogCluster) list
+        :param cluster_list: log cluster list
+        :param seq: candidate token sequence
+        :return: the matched log cluster
+        """
         ret_cluster = None
 
         max_sim = -1
@@ -223,7 +234,7 @@ class LogParser:
         return result
 
     def output_result(self, cluster_list):
-        log_templates = [0] * self.df_log.shape[0]
+        log_templates = [EMPTY_TOKEN] * self.df_log.shape[0]
         log_template_ids = [0] * self.df_log.shape[0]
         df_events = []
         for log_cluster in cluster_list:
@@ -271,6 +282,11 @@ class LogParser:
             self.print_tree(node.child_node[child], depth + 1)
 
     def parse(self, log_name):
+        """
+        This is the main entry point for Drain log parser.
+        The result will be write to output_dir
+        :param log_name: the file name of the log
+        """
         print('Parsing file: ' + os.path.join(self.input_dir, log_name))
         log.info('Parsing file: ' + os.path.join(self.input_dir, log_name))
         start_time = datetime.now()
@@ -343,6 +359,8 @@ class LogParser:
     @staticmethod
     def generate_format_regex(log_format):
         """ Function to generate regular expression to split log messages
+        :param log_format: log format expression string, eg: <xx> <yy>: <zz>
+        :return: the regex for splitting the log message
         """
         headers = []
         splitters = re.split(r'(<[^<>]+>)', log_format)
@@ -360,6 +378,11 @@ class LogParser:
 
     @staticmethod
     def get_parameter_list(row):
+        """
+        Extract parameter values from a data row
+        :param row: data row
+        :return: a list of parameter values according to its template
+        """
         template_regex = re.sub(r"<[^<>]+>", PLACEHOLDER_PARAM, row["EventTemplate"])
         if PLACEHOLDER_PARAM not in template_regex:
             return []
