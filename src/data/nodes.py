@@ -15,13 +15,17 @@ log = logging.getLogger(__name__)
 
 def parse_log(input_dir, log_format, log_file, result_dir, similarity_threshold, depth, regex):
     """parsing log
-    similarity_threshold: Similarity threshold
-    depth: Depth of all leaf nodes
-    regex: regular expression list for optional pre-processing (default: [])
+    :param input_dir:
+    :param log_format: the log format expression
+    :param log_file: the target log file to analyse
+    :param result_dir: the output dir for storing the result
+    :param similarity_threshold: Similarity threshold
+    :param depth: Depth of all leaf nodes
+    :param regex: regular expression list for optional pre-processing
     """
     # parsing log into structured CSV
-    parser = drain.LogParser(log_format, indir=input_dir,
-                             outdir=result_dir, depth=depth, st=similarity_threshold, rex=regex)
+    parser = drain.LogParser(log_format, indir=input_dir, outdir=result_dir, depth=depth,
+                             similarity_threshold=similarity_threshold, preprocess_regex=regex)
     parser.parse(log_file)
 
     return path.join(result_dir, log_file + SUFFIX_PARSED_LOG)
@@ -57,7 +61,6 @@ def make_dataloader(csv_file, event_key, sequence_key, window_size, batch_size):
 
     dataset = generate_dataset(df[sequence_key], window_size)
 
-    dataloader = DataLoader(dataset, batch_size=batch_size,
-                            shuffle=True, pin_memory=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
     return dataloader, num_classes

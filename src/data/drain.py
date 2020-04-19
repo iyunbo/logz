@@ -20,10 +20,13 @@ log = logging.getLogger(__name__)
 
 class LogCluster:
     def __init__(self, sequence=None, id_list=None):
+        """
+        A log cluster maintains a token sequence with all matching identifiers
+        :param sequence: whole token sequence
+        :param id_list: list containing all matching identifiers
+        """
         self.sequence = sequence
-        if id_list is None:
-            id_list = []
-        self.id_list = id_list
+        self.id_list = id_list if id_list is None else []
 
 
 class Node:
@@ -42,27 +45,29 @@ class Node:
 
 
 class LogParser:
-    def __init__(self, log_format, indir='./', outdir='./result/', depth=4, st=0.4,
-                 max_child=100, rex=None, keep_para=True):
+    def __init__(self, log_format, indir='./', outdir='./result/', depth=4, similarity_threshold=0.4,
+                 max_child=100, preprocess_regex=None, keep_param=True):
         """
         This class implements the main algorithm of Drain parse
-            :param rex : regular expressions used in preprocessing (step1)
+            :param log_format: the log format expression, eg: <Date> <Time> <Level> <Subject>: <Content>
             :param indir : the input path stores the input log file name
-            :param depth : depth of all leaf nodes
-            :param st : similarity threshold
-            :param max_child : max number of children of an internal node
             :param outdir : the output path stores the file containing structured logs
+            :param depth : depth of all leaf nodes
+            :param similarity_threshold : similarity threshold
+            :param max_child : max number of children of an internal node
+            :param preprocess_regex : regular expressions used in preprocessing (step1)
+            :param keep_param: indicate if keeping parameter values during the process
         """
-        self.path = indir
+        self.input_dir = indir
         self.depth = depth - 2
-        self.st = st
+        self.similarity_threshold = similarity_threshold
         self.max_child = max_child
         self.log_name = None
-        self.savePath = outdir
+        self.output_dir = outdir
         self.df_log = None
         self.log_format = log_format
-        self.rex = rex if rex is not None else []
-        self.keep_para = keep_para
+        self.preprocess_regex = preprocess_regex if preprocess_regex is not None else []
+        self.keep_param = keep_param
 
     @staticmethod
     def has_number(s):
@@ -196,7 +201,7 @@ class LogParser:
                 max_param_num = cur_param_num
                 max_cluster = cluster
 
-        if max_sim >= self.st:
+        if max_sim >= self.similarity_threshold:
             ret_cluster = max_cluster
 
         return ret_cluster
@@ -234,16 +239,16 @@ class LogParser:
         self.df_log['EventId'] = log_template_ids
         self.df_log['EventTemplate'] = log_templates
 
-        if self.keep_para:
+        if self.keep_param:
             self.df_log["ParameterList"] = self.df_log.apply(self.get_parameter_list, axis=1)
-        self.df_log.to_csv(os.path.join(self.savePath, self.log_name + '_structured.csv'), index=False)
+        self.df_log.to_csv(os.path.join(self.output_dir, self.log_name + '_structured.csv'), index=False)
 
         occ_dict = dict(self.df_log['EventTemplate'].value_counts())
         df_event = pd.DataFrame()
         df_event['EventTemplate'] = self.df_log['EventTemplate'].unique()
         df_event['EventId'] = df_event['EventTemplate'].map(lambda x: hashlib.md5(x.encode('utf-8')).hexdigest()[0:8])
         df_event['Occurrences'] = df_event['EventTemplate'].map(occ_dict)
-        df_event.to_csv(os.path.join(self.savePath, self.log_name + '_templates.csv'), index=False,
+        df_event.to_csv(os.path.join(self.output_dir, self.log_name + '_templates.csv'), index=False,
                         columns=["EventId", "EventTemplate", "Occurrences"])
 
     def print_tree(self, node, depth):
@@ -266,8 +271,8 @@ class LogParser:
             self.print_tree(node.child_node[child], depth + 1)
 
     def parse(self, log_name):
-        print('Parsing file: ' + os.path.join(self.path, log_name))
-        log.info('Parsing file: ' + os.path.join(self.path, log_name))
+        print('Parsing file: ' + os.path.join(self.input_dir, log_name))
+        log.info('Parsing file: ' + os.path.join(self.input_dir, log_name))
         start_time = datetime.now()
         self.log_name = log_name
         root_node = Node()
@@ -299,8 +304,8 @@ class LogParser:
                 print('Processed {0:.1f}% of log lines.'.format(count * 100.0 / len(self.df_log)))
                 log.info('Processed {0:.1f}% of log lines.'.format(count * 100.0 / len(self.df_log)))
 
-        if not os.path.exists(self.savePath):
-            os.makedirs(self.savePath)
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
 
         self.output_result(cluster_list)
 
@@ -309,10 +314,10 @@ class LogParser:
 
     def load_data(self):
         headers, regex = self.generate_format_regex(self.log_format)
-        self.df_log = self.log_to_dataframe(os.path.join(self.path, self.log_name), regex, headers)
+        self.df_log = self.log_to_dataframe(os.path.join(self.input_dir, self.log_name), regex, headers)
 
     def preprocess(self, line):
-        for currentRex in self.rex:
+        for currentRex in self.preprocess_regex:
             line = re.sub(currentRex, PLACEHOLDER_PARAM, line)
         return line
 
