@@ -90,3 +90,4 @@ logs
 data/interim
 .ipython/*
 data/**
+/src/tests/data/test.log_templates.csv
