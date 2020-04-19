@@ -9,7 +9,8 @@ import logging
 import os
 import re
 from datetime import datetime
-from typing import Union
+from re import Pattern
+from typing import Union, List
 
 import pandas as pd
 
@@ -19,14 +20,15 @@ log = logging.getLogger(__name__)
 
 
 class LogCluster:
-    def __init__(self, sequence=None, id_list=None):
+    def __init__(self, sequence=Union[list, None], id_list=Union[list, None]):
         """
         A log cluster maintains a token sequence with all matching identifiers
+
         :param sequence: whole token sequence
         :param id_list: list containing all matching identifiers
         """
         self.sequence = sequence
-        self.id_list = id_list if id_list is None else []
+        self.id_list = id_list if id_list is not None else []
 
 
 class Node:
@@ -35,6 +37,7 @@ class Node:
         A Node represents a general sub-tree with a root node and a list of children.
         The children number is not fixed and we store the children list into a dict.
         The first layer of the tree stores the dict in form of {sequence length : sub-tree}
+
         :param child_node: children list
         :param depth: the depth of this subtree
         :param digit_or_token: the content of the current node, it can be a token or the length of sequence
@@ -45,18 +48,19 @@ class Node:
 
 
 class LogParser:
-    def __init__(self, log_format, indir='./', outdir='./result/', depth=4, similarity_threshold=0.4,
+    def __init__(self, log_format: str, indir='./', outdir='./result/', depth=4, similarity_threshold=0.4,
                  max_child=100, preprocess_regex=None, keep_param=True):
         """
         This class implements the main algorithm of Drain parse
-            :param log_format: the log format expression, eg: <Date> <Time> <Level> <Subject>: <Content>
-            :param indir : the input path stores the input log file name
-            :param outdir : the output path stores the file containing structured logs
-            :param depth : depth of all leaf nodes
-            :param similarity_threshold : similarity threshold
-            :param max_child : max number of children of an internal node
-            :param preprocess_regex : regular expressions used in preprocessing (step1)
-            :param keep_param: indicate if keeping parameter values during the process
+
+        :param log_format: the log format expression, eg: <Date> <Time> <Level> <Subject>: <Content>
+        :param indir : the input path stores the input log file name
+        :param outdir : the output path stores the file containing structured logs
+        :param depth : depth of all leaf nodes
+        :param similarity_threshold : similarity threshold
+        :param max_child : max number of children of an internal node
+        :param preprocess_regex : regular expressions used in preprocessing (step1)
+        :param keep_param: indicate if keeping parameter values during the process
         """
         self.input_dir = indir
         self.depth = depth - 2
@@ -70,12 +74,13 @@ class LogParser:
         self.keep_param = keep_param
 
     @staticmethod
-    def has_number(s):
+    def has_number(s: str):
         return any(char.isdigit() for char in s)
 
-    def tree_search(self, root_node: Node, seq: list) -> Union[LogCluster, None]:
+    def tree_search(self, root_node: Node, seq: List[str]) -> Union[LogCluster, None]:
         """
         Search the matching Log cluster in the tree.
+
         :param root_node: the root of the tree
         :param seq: the sequence of log tokens
         :return: matching LogCluster or None if none matches
@@ -107,7 +112,7 @@ class LogParser:
 
         return target_cluster
 
-    def add_to_tree(self, root_node, cluster):
+    def add_to_tree(self, root_node: Node, cluster: LogCluster):
         """
         Core algorithm for inserting a log cluster into existing token tree
         :param root_node: the root of the tree
@@ -170,9 +175,10 @@ class LogParser:
             current_depth += 1
 
     @staticmethod
-    def seq_similarity(template, seq):
+    def seq_similarity(template: List[str], seq: List[str]) -> (float, int):
         """
         Calculate sequence similarity according to specified template
+
         :param template: the log template to consider
         :param seq: the sequence to analyse
         :return: the similarity between the sequence and the template, the number of detected parameters
@@ -192,9 +198,10 @@ class LogParser:
 
         return similarity, param_num
 
-    def fast_match(self, cluster_list, seq):
+    def fast_match(self, cluster_list: List[LogCluster], seq: List[str]):
         """
         Find a match of sequence from a log cluster (see LogCluster) list
+
         :param cluster_list: log cluster list
         :param seq: candidate token sequence
         :return: the matched log cluster
@@ -218,7 +225,7 @@ class LogParser:
         return ret_cluster
 
     @staticmethod
-    def get_template(seq1, seq2):
+    def get_template(seq1: List[str], seq2: List[str]) -> List[str]:
         assert len(seq1) == len(seq2)
         result = []
 
@@ -233,7 +240,7 @@ class LogParser:
 
         return result
 
-    def output_result(self, cluster_list):
+    def output_result(self, cluster_list: List[LogCluster]):
         log_templates = [EMPTY_TOKEN] * self.df_log.shape[0]
         log_template_ids = [0] * self.df_log.shape[0]
         df_events = []
@@ -241,17 +248,17 @@ class LogParser:
             template_str = ' '.join(log_cluster.sequence)
             occurrence = len(log_cluster.id_list)
             template_id = hashlib.md5(template_str.encode('utf-8')).hexdigest()[0:8]
-            for logID in log_cluster.id_list:
-                logID -= 1
-                log_templates[logID] = template_str
-                log_template_ids[logID] = template_id
+            for log_id in log_cluster.id_list:
+                log_id -= 1
+                log_templates[log_id] = template_str
+                log_template_ids[log_id] = template_id
             df_events.append([template_id, template_str, occurrence])
 
         self.df_log['EventId'] = log_template_ids
         self.df_log['EventTemplate'] = log_templates
 
         if self.keep_param:
-            self.df_log["ParameterList"] = self.df_log.apply(self.get_parameter_list, axis=1)
+            self.df_log["ParameterList"] = self.df_log.apply(self.get_parameters, axis=1)
         self.df_log.to_csv(os.path.join(self.output_dir, self.log_name + '_structured.csv'), index=False)
 
         occ_dict = dict(self.df_log['EventTemplate'].value_counts())
@@ -262,7 +269,7 @@ class LogParser:
         df_event.to_csv(os.path.join(self.output_dir, self.log_name + '_templates.csv'), index=False,
                         columns=["EventId", "EventTemplate", "Occurrences"])
 
-    def print_tree(self, node, depth):
+    def print_tree(self, node: Node, depth: int):
         output = ''
         for i in range(depth):
             output += '\t'
@@ -281,10 +288,11 @@ class LogParser:
         for child in node.child_node:
             self.print_tree(node.child_node[child], depth + 1)
 
-    def parse(self, log_name):
+    def parse(self, log_name: str):
         """
         This is the main entry point for Drain log parser.
         The result will be write to output_dir
+
         :param log_name: the file name of the log
         """
         print('Parsing file: ' + os.path.join(self.input_dir, log_name))
@@ -332,14 +340,20 @@ class LogParser:
         headers, regex = self.generate_format_regex(self.log_format)
         self.df_log = self.log_to_dataframe(os.path.join(self.input_dir, self.log_name), regex, headers)
 
-    def preprocess(self, line):
-        for currentRex in self.preprocess_regex:
-            line = re.sub(currentRex, PLACEHOLDER_PARAM, line)
+    def preprocess(self, line: str) -> str:
+        for current_rex in self.preprocess_regex:
+            line = re.sub(current_rex, PLACEHOLDER_PARAM, line)
         return line
 
     @staticmethod
     def log_to_dataframe(log_file, regex, headers):
-        """ Function to transform log file to dataframe
+        """
+        Function to transform log file to dataframe
+
+        :param log_file: the log file name
+        :param regex: the regex template representing the log file format
+        :param headers: columns of structured log
+        :return: pandas dataframe
         """
         log_messages = []
         line_count = 0
@@ -357,8 +371,9 @@ class LogParser:
         return log_df
 
     @staticmethod
-    def generate_format_regex(log_format):
+    def generate_format_regex(log_format: str) -> (List[str], Pattern):
         """ Function to generate regular expression to split log messages
+
         :param log_format: log format expression string, eg: <xx> <yy>: <zz>
         :return: the regex for splitting the log message
         """
@@ -377,9 +392,10 @@ class LogParser:
         return headers, regex
 
     @staticmethod
-    def get_parameter_list(row):
+    def get_parameters(row: pd.Series) -> List[str]:
         """
         Extract parameter values from a data row
+
         :param row: data row
         :return: a list of parameter values according to its template
         """

@@ -125,6 +125,6 @@ def test_get_parameter_list():
     row = {"Content": "20/02/28 22:47:36 INFO JettyClient$: xxx",
            "Component": "JettyClient$",
            "EventTemplate": "<Date> <Time> <Level> <Component>: <Content>"}
-    params = parser.get_parameter_list(row)
+    params = parser.get_parameters(row)
 
     assert len(params) == 5
