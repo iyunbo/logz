@@ -76,7 +76,7 @@ def test_model(device, positive, input_size, model, num_candidates, test_data_lo
 
 
 def train(dataloader, model_dir, num_classes, window_size, batch_size, num_epochs, input_size, hidden_size, num_layers,
-          device):
+          device) -> str:
     model = DeepLog(input_size, hidden_size, num_layers, num_classes, device)
     model_name = 'Adam_batch_size={}_epoch={}'.format(str(batch_size), str(num_epochs))
     writer = SummaryWriter(log_dir=os.path.join(model_dir, model_name))

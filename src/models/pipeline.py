@@ -6,7 +6,7 @@ from kedro.pipeline import Pipeline, node
 from .nodes import train, predict
 
 
-def create_pipeline(**kwargs):
+def create_pipeline():
     return Pipeline(
         [
             node(
