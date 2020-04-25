@@ -370,8 +370,8 @@ class LogParser:
         """
         log_messages = []
         line_count = 0
-        with open(log_file, 'r') as fin:
-            for line in fin.readlines():
+        with open(log_file, 'r') as infile:
+            for line in infile:
                 match = regex.search(line.strip())
                 if match:
                     message = [match.group(header) for header in headers]
