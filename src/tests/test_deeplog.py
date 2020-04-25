@@ -27,10 +27,10 @@ def test_model_forward():
 
 
 def test_make_sequence():
-    seq = nodes.make_sequences("test1", [1, 2, 3, 4, 5, 6, 7, 8, 9], 8)
+    seq = nodes.make_sequences("test1", [[1, 2, 3, 4, 5, 6, 7, 8, 9]], 8)
     assert seq == [(1, 2, 3, 4, 5, 6, 7, 8, 9)]
 
-    seq = nodes.make_sequences("test2", [1, 2, 3, 4, 5, 6, 7, 8, 9], 9)
+    seq = nodes.make_sequences("test2", [[1, 2, 3, 4, 5, 6, 7, 8, 9]], 9)
     assert seq == [(1, 2, 3, 4, 5, 6, 7, 8, 9, -1)]
 
 
@@ -48,5 +48,5 @@ def test_training():
 
 def test_prediction():
     nodes.predict(num_classes=2, model_path=path.join(pwd, "data", f"Adam_batch_size=1_epoch={num_epochs}.pt"),
-                  normal_sample=[1, 2, 3, 4, 5, 6, 7, 8], abnormal_sample=[2, 2, 2, 2, 2, 2, 2, 2], window_size=3,
+                  normal_sample=[[1, 2, 3, 4, 5, 6, 7, 8]], abnormal_sample=[[2, 2, 2, 2, 2, 2, 2, 2]], window_size=3,
                   input_size=1, num_layers=2, num_candidates=2, cpu_or_gpu="cpu", hidden_size=8)
