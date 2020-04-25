@@ -17,7 +17,7 @@ def create_pipeline(**kwargs):
                  "params:parsing_result_dir",
                  "params:parsing_similarity_threshold",
                  "params:parsing_tree_depth",
-                 "params:parsing_regex",
+                 "params:parsing_regex"
                  ],
                 "structured_csv",
             ),

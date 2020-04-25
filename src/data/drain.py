@@ -14,7 +14,20 @@ from typing import Union, List
 
 import pandas as pd
 
-from ..constant import PLACEHOLDER_PARAM, EMPTY_TOKEN
+# the column name for log line identifier
+LINE_ID = 'LineId'
+
+# the column name of the main part of the log
+CONTENT = "Content"
+
+# the parsing result file suffix
+SUFFIX_PARSED_LOG = "_structured.csv"
+
+# parameter placeholder used to indicate where are parameters in each line
+PLACEHOLDER_PARAM = "<*>"
+
+# a string to represent the empty token
+EMPTY_TOKEN = "#N/A#"
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +62,7 @@ class Node:
 
 class LogParser:
     def __init__(self, log_format: str, indir='./', outdir='./result/', depth=4, similarity_threshold=0.4,
-                 max_child=100, preprocess_regex=None, keep_param=True):
+                 max_child=100, content_regex=None, keep_param=True):
         """
         This class implements the main algorithm of Drain parse
 
@@ -59,7 +72,7 @@ class LogParser:
         :param depth : depth of all leaf nodes
         :param similarity_threshold : similarity threshold
         :param max_child : max number of children of an internal node
-        :param preprocess_regex : regular expressions used in preprocessing (step1)
+        :param content_regex : regular expressions used in preprocessing (step1)
         :param keep_param: indicate if keeping parameter values during the process
         """
         self.input_dir = indir
@@ -70,7 +83,7 @@ class LogParser:
         self.output_dir = outdir
         self.df_log = None
         self.log_format = log_format
-        self.preprocess_regex = preprocess_regex if preprocess_regex is not None else []
+        self.content_regex = content_regex if content_regex is not None else []
         self.keep_param = keep_param
 
     @staticmethod
@@ -307,7 +320,7 @@ class LogParser:
         count = 0
         for idx, line in self.df_log.iterrows():
             log_id = line['LineId']
-            message_seq = self.preprocess(line['Content']).strip().split()
+            message_seq = self.preprocess(line[CONTENT]).strip().split()
             match_cluster = self.tree_search(root_node, message_seq)
 
             # Match no existing log cluster
@@ -341,7 +354,7 @@ class LogParser:
         self.df_log = self.log_to_dataframe(os.path.join(self.input_dir, self.log_name), regex, headers)
 
     def preprocess(self, line: str) -> str:
-        for current_rex in self.preprocess_regex:
+        for current_rex in self.content_regex:
             line = re.sub(current_rex, PLACEHOLDER_PARAM, line)
         return line
 
@@ -366,8 +379,8 @@ class LogParser:
                     line_count += 1
 
         log_df = pd.DataFrame(log_messages, columns=headers)
-        log_df.insert(0, 'LineId', None)
-        log_df['LineId'] = [i + 1 for i in range(line_count)]
+        log_df.insert(0, LINE_ID, None)
+        log_df[LINE_ID] = [i + 1 for i in range(line_count)]
         return log_df
 
     @staticmethod
@@ -406,7 +419,7 @@ class LogParser:
         escaped_param_placeholder = re.sub(r'([^A-Za-z0-9])', r'\\\1', PLACEHOLDER_PARAM)
         template_regex = re.sub(r'\\ +', r'\\s+', template_regex)
         template_regex = "^" + template_regex.replace(escaped_param_placeholder, "(.*?)") + "$"
-        parameter_list = re.findall(template_regex, row["Content"])
+        parameter_list = re.findall(template_regex, row[CONTENT])
         parameter_list = parameter_list[0] if parameter_list else ()
         parameter_list = list(parameter_list) if isinstance(parameter_list, tuple) else [parameter_list]
         return parameter_list

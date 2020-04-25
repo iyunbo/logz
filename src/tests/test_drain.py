@@ -5,7 +5,7 @@ import pathlib
 import pandas as pd
 
 from . import helper
-from ..constant import PLACEHOLDER_PARAM, SUFFIX_PARSED_LOG
+from ..data.drain import PLACEHOLDER_PARAM, SUFFIX_PARSED_LOG
 from ..data import drain
 from ..data import nodes
 
@@ -143,3 +143,15 @@ def test_make_dataloader():
                                                     window_size=5, batch_size=2)
     assert num_classes == 24
     assert len(dataloader) == 16
+
+
+def test_regex_generation():
+    headers, regex = parser.generate_format_regex("<Date> <Time> <Number> <Component> <Content>")
+    assert headers == ["Date", "Time", "Number", "Component", "Content"]
+    match = regex.match("yyyyMMdd hh:mm:ss 120 thread some logging and bla bla")
+    assert match
+    assert match.group("Date") == "yyyyMMdd"
+    assert match.group("Time") == "hh:mm:ss"
+    assert match.group("Number") == "120"
+    assert match.group("Component") == "thread"
+    assert match.group("Content") == "some logging and bla bla"
