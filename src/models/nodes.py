@@ -14,9 +14,10 @@ log = logging.getLogger(__name__)
 
 def make_sequences(name, sample, window_size):
     sequences = []
-    ln = sample + [-1] * (window_size + 1 - len(sample))
-    sequences.append(tuple(ln))
-    log.info(f'Number of sequences({name}): {len(ln)}')
+    for line in sample:
+        ln = line + [-1] * (window_size + 1 - len(line))
+        sequences.append(tuple(ln))
+    log.info(f'Number of sequences({name}): {len(sequences)}')
     return sequences
 
 

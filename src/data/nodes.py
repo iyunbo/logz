@@ -8,7 +8,6 @@ from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import TensorDataset, DataLoader
 
 from . import drain
-from ..constant import SUFFIX_PARSED_LOG
 
 log = logging.getLogger(__name__)
 
@@ -25,10 +24,10 @@ def parse_log(input_dir, log_format, log_file, result_dir, similarity_threshold,
     """
     # parsing log into structured CSV
     parser = drain.LogParser(log_format, indir=input_dir, outdir=result_dir, depth=depth,
-                             similarity_threshold=similarity_threshold, preprocess_regex=regex)
+                             similarity_threshold=similarity_threshold, content_regex=regex)
     parser.parse(log_file)
 
-    return path.join(result_dir, log_file + SUFFIX_PARSED_LOG)
+    return path.join(result_dir, log_file + drain.SUFFIX_PARSED_LOG)
 
 
 def generate_dataset(series, window_size):

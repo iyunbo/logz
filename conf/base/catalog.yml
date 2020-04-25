@@ -39,50 +39,18 @@
 # (transcoding), templating and a way to reuse arguments that are frequently repeated. See more here:
 # https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html
 
-#
-# This is a data set used by the "Hello World" example pipeline provided with the project
-# template. Please feel free to remove it once you remove the example pipeline.
-
-spark_log_raw:
-  type: text.TextDataSet
-  filepath: data/external/Spark_2k.log
-
-spark_log_structured:
-  type: pandas.CSVDataSet
-  filepath: data/interim/Spark_2k.log_structured.csv
-
-spark_log_templates:
-  type: pandas.CSVDataSet
-  filepath: data/interim/Spark_2k.log_templates.csv
-
-hdfs_test_abnormal:
-  type: text.TextDataSet
-  filepath: data/external/hdfs_test_abnormal
-
-hdfs_test_normal:
-  type: text.TextDataSet
-  filepath: data/external/hdfs_test_normal
-
-hdfs_train:
-  type: text.TextDataSet
-  filepath: data/external/hdfs_train
-
-log4j_raw:
-  type: text.TextDataSet
-  filepath: data/raw/log4j-2020-02-28-22.log
-
-log4j_structured:
-  type: pandas.CSVDataSet
-  filepath: data/interim/log4j-2020-02-28-22.log_structured.csv
-
-log4j_templates:
-  type: pandas.CSVDataSet
-  filepath: data/interim/log4j-2020-02-28-22.log_templates.csv
-
 normal_sample:
   type: MemoryDataSet
-  data: [67, 83, 30, 74, 73, 0, 22, 22, 24, 173, 186, 117, 79, 44, 45, 66, 205]
+  data: [[26, 22, 18, 34, 28, 24, 20, 16, 32, 29, 23],
+         [95, 96, 62, 87, 8, 72, 78, 72, 78, 1, 2],
+         [94, 92, 99, 100, 98, 97, 14, 99, 100, 98, 97],
+         [92, 77, 94, 92, 77, 94, 92, 51, 51, 10, 51],
+         [77, 94, 92, 77, 94, 92, 77, 94, 92, 77, 94]]
 
 abnormal_sample:
   type: MemoryDataSet
-  data: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+  data: [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+         [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+         [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+         [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
+         [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]]

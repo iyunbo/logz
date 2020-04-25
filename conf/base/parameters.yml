@@ -4,10 +4,10 @@
 input_dir: "data/raw/"
 
 # The input log file name
-log_file: "log4j-2020-02-28-22.log"
+log_file: "storage_lib.log"
 
 # log format expression with <column1>other string<column2>or separator<column3>
-log_format: "<Date> <Time> <Level> <Component>: <Content>"
+log_format: "<Date> <Time> <Content>"
 
 # The output directory of parsing results
 parsing_result_dir: "data/interim"
@@ -18,8 +18,8 @@ parsing_similarity_threshold: 0.6
 # the depth of parsing tree
 parsing_tree_depth: 4
 
-# the optional regex for optimized parsing
-parsing_regex: []
+# the optional regex for optimized parsing of Content part of the log
+parsing_regex: ["\\[.+\\s+.+\\]"]
 
 # The column name for event unique name
 event_key: "EventTemplate"
@@ -34,7 +34,7 @@ window_size: 10
 batch_size: 16
 
 # Number of epochs for training
-num_epochs: 5
+num_epochs: 3
 
 # The length of LSTM input vector
 lstm_input_size: 1
